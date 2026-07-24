@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Workspace | Pixel Plates</title>
+
+  <link
+    rel="stylesheet"
+    href="CSS/style.css"
+  >
+</head>
+
+<body class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">PP</span>
+      <span>PIXEL PLATES</span>
+    </a>
+
+    <div class="venue">
+      <small>RESTAURANT</small>
+
+      <strong id="restaurant-name">
+        Loading...
+      </strong>
+    </div>
+
+    <nav
+      id="app-nav"
+      aria-label="Workspace"
+    >
+      <button data-view="order">
+        <span>01</span>
+        Order Desk
+      </button>
+
+      <button data-view="kitchen">
+        <span>02</span>
+        Kitchen Board
+      </button>
+
+      <button data-view="inventory">
+        <span>03</span>
+        Menu &amp; Stock
+      </button>
+
+      <button data-view="staff">
+        <span>04</span>
+        Staff
+      </button>
+
+      <button data-view="sales">
+        <span>05</span>
+        Sales &amp; Payments
+      </button>
+
+      <button data-view="devices">
+        <span>06</span>
+        Table Tablets
+      </button>
+    </nav>
+
+    <div class="profile">
+      <div>
+        <strong id="user-name"></strong>
+        <small id="user-role"></small>
+      </div>
+
+      <button
+        id="logout"
+        class="icon-button"
+        title="Log out"
+        aria-label="Log out"
+      >
+        &rarr;
+      </button>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div>
+        <p id="eyebrow">SERVICE</p>
+        <h1 id="heading">Order Desk</h1>
+      </div>
+
+      <div class="service-meta">
+        <span class="live-dot"></span>
+        <span id="today"></span>
+      </div>
+    </header>
+
+    <div
+      id="notice"
+      class="notice"
+      role="status"
+      hidden
+    ></div>
+
+    <section
+      id="order"
+      class="view"
+    ></section>
+
+    <section
+      id="kitchen"
+      class="view"
+    ></section>
+
+    <section
+      id="inventory"
+      class="view"
+    ></section>
+
+    <section
+      id="staff"
+      class="view"
+    ></section>
+
+    <section
+      id="sales"
+      class="view"
+    ></section>
+
+    <section
+      id="devices"
+      class="view"
+    ></section>
+  </main>
+
+  <dialog id="item-dialog">
+    <form
+      id="item-form"
+      method="dialog"
+      class="dialog-form"
+    >
+      <div class="dialog-heading">
+        <div>
+          <p>MENU ITEM</p>
+
+          <h2 id="item-dialog-title">
+            Add dish
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="icon-button"
+          data-close
+          aria-label="Close"
+        >
+          &times;
+        </button>
+      </div>
+
+      <input
+        id="item-id"
+        type="hidden"
+      >
+
+      <label>
+        Dish name
+
+        <input
+          id="item-name"
+          required
+          maxlength="120"
+        >
+      </label>
+
+      <label>
+        Category
+
+        <input
+          id="item-category"
+          required
+          maxlength="60"
+        >
+      </label>
+
+      <div class="form-row">
+        <label>
+          Price (UGX)
+
+          <input
+            id="item-price"
+            type="number"
+            min="0"
+            step="1"
+            required
+          >
+        </label>
+
+        <label>
+          Stock
+
+          <input
+            id="item-stock"
+            type="number"
+            min="0"
+            step="1"
+            required
+          >
+        </label>
+      </div>
+
+      <label class="check-label">
+        <input
+          id="item-active"
+          type="checkbox"
+          checked
+        >
+
+        Available on the order menu
+      </label>
+
+      <label>
+        Product image
+        (JPG, PNG, or WebP; maximum 5 MB)
+
+        <input
+          id="item-image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        >
+      </label>
+
+      <div class="dialog-actions">
+        <button
+          type="button"
+          class="secondary"
+          data-close
+        >
+          Cancel
+        </button>
+
+        <button type="submit">
+          Save item
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script
+    type="module"
+    src="JS/app.js"
+  ></script>
+</body>
+</html>

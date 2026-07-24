@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Staff Login | Pixel Plates</title>
+    <link rel="stylesheet" href="CSS/style.css" />
+  </head>
+  <body class="auth-page">
+    <a href="index.html" class="brand auth-brand"
+      ><span class="brand-mark">PP</span><span>PIXEL PLATES</span></a
+    >
+    <main class="auth-panel">
+      <p class="kicker">RESTAURANT OPERATIONS</p>
+      <h1>Welcome back.</h1>
+      <p class="muted">
+        Sign in with the account created by your restaurant administrator.
+      </p>
+      <form id="login-form">
+        <label
+          >Email address<input
+            id="email"
+            type="email"
+            autocomplete="username"
+            required
+            placeholder="name@restaurant.com"
+        /></label>
+        <label
+          >Password<input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            placeholder="Your password"
+        /></label>
+        <button id="login-button" type="submit">Enter workspace</button>
+        <p id="error" class="form-error" role="alert"></p>
+      </form>
+    </main>
+    <div class="auth-image" role="img" aria-label="Restaurant service"></div>
+    <script type="module" src="JS/auth.js"></script>
+  </body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Table Menu | Pixel Plates</title>
+
+  <link
+    rel="stylesheet"
+    href="CSS/style.css"
+  >
+</head>
+
+<body class="customer-page">
+  <header class="customer-header">
+    <div>
+      <a class="brand" href="#">
+        <span class="brand-mark">PP</span>
+        <span id="customer-restaurant">
+          PIXEL PLATES
+        </span>
+      </a>
+
+      <small id="customer-table"></small>
+    </div>
+
+    <div class="customer-time">
+      <strong id="customer-clock"></strong>
+      <span id="customer-date"></span>
+    </div>
+  </header>
+
+  <main class="customer-main">
+    <div
+      id="customer-error"
+      class="notice error"
+      role="alert"
+      hidden
+    ></div>
+
+    <section>
+      <div class="customer-tabs">
+        <button
+          class="active"
+          data-customer-view="menu"
+        >
+          Menu
+        </button>
+
+        <button data-customer-view="tracking">
+          Track orders
+          <span id="tracking-count"></span>
+        </button>
+      </div>
+
+      <div id="customer-menu"></div>
+
+      <div
+        id="customer-tracking"
+        hidden
+      ></div>
+    </section>
+
+    <aside class="cart-panel customer-cart">
+      <div class="cart-heading">
+        <div>
+          <p>YOUR ORDER</p>
+
+          <h2 id="customer-cart-count">
+            0 items
+          </h2>
+        </div>
+      </div>
+
+      <div
+        id="customer-cart-items"
+        class="cart-items"
+      ></div>
+
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total</span>
+
+          <strong id="customer-total">
+            UGX 0
+          </strong>
+        </div>
+
+        <button id="place-customer-order">
+          Place order
+          <span>&rarr;</span>
+        </button>
+      </div>
+    </aside>
+  </main>
+
+  <script
+    type="module"
+    src="JS/customer.js"
+  ></script>
+</body>
+</html>
