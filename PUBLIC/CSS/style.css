@@ -243,6 +243,29 @@ form button,
   color: var(--danger);
   font-size: 13px;
 }
+.password-field {
+  position: relative;
+}
+.password-field input {
+  padding-right: 60px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.password-toggle:hover {
+  background: var(--mint);
+  color: var(--forest);
+}
 .auth-image {
   min-height: 100vh;
   background:

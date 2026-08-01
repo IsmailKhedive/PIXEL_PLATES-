@@ -26,13 +26,26 @@
             placeholder="name@restaurant.com"
         /></label>
         <label
-          >Password<input
-            id="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            placeholder="Your password"
-        /></label>
+          >Password
+          <div class="password-field">
+            <input
+              id="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="Your password"
+            />
+            <button
+              type="button"
+              id="toggle-password"
+              class="password-toggle"
+              aria-label="Show password"
+              aria-pressed="false"
+            >
+              Show
+            </button>
+          </div>
+        </label>
         <button id="login-button" type="submit">Enter workspace</button>
         <p id="error" class="form-error" role="alert"></p>
       </form>

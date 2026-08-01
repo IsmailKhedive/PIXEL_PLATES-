@@ -3,6 +3,16 @@ const errorElement = document.querySelector("#error");
 const loginButton = document.querySelector("#login-button");
 const emailInput = document.querySelector("#email");
 const passwordInput = document.querySelector("#password");
+const togglePasswordButton = document.querySelector("#toggle-password");
+
+togglePasswordButton.addEventListener("click", () => {
+  const isHidden = passwordInput.type === "password";
+
+  passwordInput.type = isHidden ? "text" : "password";
+  togglePasswordButton.textContent = isHidden ? "Hide" : "Show";
+  togglePasswordButton.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+  togglePasswordButton.setAttribute("aria-pressed", isHidden ? "true" : "false");
+});
 
 if (localStorage.getItem("token") && localStorage.getItem("user")) {
   window.location.replace("dashboard.html");
