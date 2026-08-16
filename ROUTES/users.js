@@ -2,14 +2,16 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 
 import db from "../db.js";
-import { protect, admin } from "../authMiddleware.js";
+
+import { protect, allowRoles } from "../authMiddleware.js";
 
 const router = Router();
 
 /*
- * Only administrators may view staff accounts.
+ * Administrators and managers can view
+ * the restaurant staff directory.
  */
-router.get("/", protect, admin, async (req, res) => {
+router.get("/", protect, allowRoles("admin", "manager"), async (req, res) => {
   try {
     const [users] = await db.query(
       `SELECT
@@ -19,7 +21,15 @@ router.get("/", protect, admin, async (req, res) => {
            role
          FROM users
          WHERE restaurant_id = ?
-         ORDER BY name`,
+         ORDER BY
+           FIELD(
+             role,
+             'admin',
+             'manager',
+             'waiter',
+             'kitchen'
+           ),
+           name`,
       [req.user.restaurantId],
     );
 
@@ -34,9 +44,14 @@ router.get("/", protect, admin, async (req, res) => {
 });
 
 /*
- * Only administrators may create staff accounts.
+ * Admin:
+ * - Can create every staff role.
+ *
+ * Manager:
+ * - Can create waiter and kitchen accounts.
+ * - Cannot create managers or administrators.
  */
-router.post("/", protect, admin, async (req, res) => {
+router.post("/", protect, allowRoles("admin", "manager"), async (req, res) => {
   const name = String(req.body.name || "").trim();
 
   const email = String(req.body.email || "")
@@ -47,7 +62,11 @@ router.post("/", protect, admin, async (req, res) => {
 
   const role = String(req.body.role || "");
 
-  const validRoles = ["admin", "waiter", "kitchen"];
+  const adminRoles = ["admin", "manager", "waiter", "kitchen"];
+
+  const managerRoles = ["waiter", "kitchen"];
+
+  const allowedRoles = req.user.role === "admin" ? adminRoles : managerRoles;
 
   if (
     !name ||
@@ -55,11 +74,13 @@ router.post("/", protect, admin, async (req, res) => {
     !email ||
     email.length > 120 ||
     password.length < 8 ||
-    !validRoles.includes(role)
+    !allowedRoles.includes(role)
   ) {
     return res.status(400).json({
       message:
-        "Provide a name, email, role, and password of at least 8 characters",
+        req.user.role === "manager"
+          ? "Managers can only create waiter and kitchen accounts"
+          : "Provide a valid name, email, role, and password of at least 8 characters",
     });
   }
 

@@ -1,10 +1,11 @@
 import { Router } from "express";
 import db from "../db.js";
-import { protect, admin } from "../authMiddleware.js";
+
+import { protect, allowRoles } from "../authMiddleware.js";
 
 const router = Router();
 
-router.get("/sales", protect, admin, async (req, res) => {
+router.get("/sales", protect, allowRoles("admin", "manager"), async (req, res) => {
   const requestedDays = Number(req.query.days) || 30;
 
   const days = Math.min(365, Math.max(1, requestedDays));

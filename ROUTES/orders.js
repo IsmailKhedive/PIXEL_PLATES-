@@ -4,14 +4,10 @@ import { protect, allowRoles } from "../authMiddleware.js";
 
 const router = Router();
 
-/*
- * Admin and kitchen users can see all restaurant orders.
- * Waiters can only see orders created by themselves.
- */
 router.get(
   "/",
   protect,
-  allowRoles("admin", "kitchen", "waiter"),
+  allowRoles("admin", "manager", "kitchen", "waiter"),
   async (req, res) => {
     try {
       const waiterFilter =
@@ -26,6 +22,7 @@ router.get(
         `SELECT
            o.id,
            o.table_number,
+           o.order_note,
            o.total,
            o.status,
            o.payment_status,
@@ -57,6 +54,7 @@ router.get(
           const order = {
             id: row.id,
             table_number: row.table_number,
+            order_note: row.order_note,
             total: row.total,
             status: row.status,
             payment_status: row.payment_status,
@@ -90,12 +88,15 @@ router.get(
   },
 );
 
-/*
- * Allow an administrator or waiter to create an order.
- */
-router.post("/", protect, allowRoles("admin", "waiter"), async (req, res) => {
+router.post("/", protect, allowRoles("admin", "manager", "waiter"), async (req, res) => {
   const tableNumber = String(req.body.tableNumber || "").trim();
+  const orderNote = String(req.body.orderNote || "").trim();
 
+  if (orderNote.length > 500) {
+    return res.status(400).json({
+      message: "Order note must be 500 characters or less",
+    });
+  }
   const requestedItems = Array.isArray(req.body.items) ? req.body.items : [];
 
   if (!tableNumber || !requestedItems.length) {
@@ -168,17 +169,23 @@ router.post("/", protect, allowRoles("admin", "waiter"), async (req, res) => {
 
       total += Number(item.price) * quantity;
     }
-
     const [order] = await connection.query(
       `INSERT INTO orders
-           (
-             restaurant_id,
-             table_number,
-             waiter_id,
-             total
-           )
-         VALUES (?, ?, ?, ?)`,
-      [req.user.restaurantId, tableNumber, req.user.id, total],
+     (
+       restaurant_id,
+       table_number,
+       waiter_id,
+       order_note,
+       total
+     )
+   VALUES (?, ?, ?, ?, ?)`,
+      [
+        req.user.restaurantId,
+        tableNumber,
+        req.user.id,
+        orderNote || null,
+        total,
+      ],
     );
 
     for (const item of menuItems) {
@@ -223,16 +230,10 @@ router.post("/", protect, allowRoles("admin", "waiter"), async (req, res) => {
   }
 });
 
-/*
- * Only kitchen and admin users may advance order status.
- *
- * The valid sequence is:
- * New -> Preparing -> Ready -> Completed
- */
 router.patch(
   "/:id",
   protect,
-  allowRoles("admin", "kitchen"),
+  allowRoles("admin", "manager", "kitchen"),
   async (req, res) => {
     const transitions = {
       New: "Preparing",
@@ -280,10 +281,7 @@ router.patch(
   },
 );
 
-/*
- * Only administrators may record or reverse payments.
- */
-router.patch("/:id/payment", protect, allowRoles("admin"), async (req, res) => {
+router.patch("/:id/payment", protect, allowRoles("admin", "manager"), async (req, res) => {
   const status = String(req.body.status || "");
 
   const method = String(req.body.method || "");

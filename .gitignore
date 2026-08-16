@@ -1,2 +1,22 @@
+# Installed packages
 node_modules/
+
+# Private configuration and passwords
 .env
+.env.local
+.env.production
+
+# Uploaded restaurant images
+PUBLIC/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor and operating system files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Old unused prototype
+backend/

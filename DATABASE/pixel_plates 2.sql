@@ -18,9 +18,11 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(120) NOT NULL,
   password VARCHAR(255) NOT NULL,
   role ENUM(
-    'admin',
-    'waiter',
-    'kitchen'
+  'admin',
+  'manager',
+  'waiter',
+  'kitchen'
+)
   ) NOT NULL DEFAULT 'waiter',
   created_at TIMESTAMP
     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -92,6 +94,7 @@ CREATE TABLE IF NOT EXISTS orders (
   table_number VARCHAR(20) NOT NULL,
   waiter_id INT NULL,
   device_id INT NULL,
+  order_note VARCHAR(500) NULL,
   total DECIMAL(10, 2) NOT NULL,
   status ENUM(
     'New',

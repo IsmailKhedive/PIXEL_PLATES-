@@ -1,3 +1,12 @@
+const MENU_CATEGORIES = [
+  "Main dishes",
+  "Appetizer",
+  "Drinks",
+  "Desserts",
+  "Extras",
+  "Chef's picks",
+];
+
 const token = localStorage.getItem("token");
 
 let user;
@@ -86,6 +95,8 @@ function notify(message, type = "success") {
 const viewsByRole = {
   admin: ["order", "kitchen", "inventory", "staff", "sales", "devices"],
 
+  manager: ["order", "kitchen", "inventory", "staff", "sales"],
+
   waiter: ["order"],
 
   kitchen: ["kitchen"],
@@ -135,13 +146,19 @@ $("#logout").addEventListener("click", () => {
 });
 
 document.querySelectorAll("#app-nav button").forEach((button) => {
-  const visible = allowedViews.includes(button.dataset.view);
+  const viewName = button.dataset.view;
 
-  button.hidden = !visible;
+  const isAllowed = allowedViews.includes(viewName);
 
-  if (visible) {
+  button.hidden = !isAllowed;
+
+  button.classList.toggle("role-hidden", !isAllowed);
+
+  button.setAttribute("aria-hidden", String(!isAllowed));
+
+  if (isAllowed) {
     button.addEventListener("click", () => {
-      openView(button.dataset.view);
+      openView(viewName);
     });
   }
 });
@@ -193,9 +210,15 @@ async function openView(name) {
 async function loadOrderDesk() {
   state.menu = await api("/menu");
 
-  const categories = [
-    ...new Set(state.menu.map((item) => item.category || "Other")),
-  ];
+  const tableOptions = Array.from({ length: 25 }, (_, index) => index + 1)
+    .map(
+      (tableNumber) => `
+        <option value="${tableNumber}">
+          Table ${tableNumber}
+        </option>
+      `,
+    )
+    .join("");
 
   $("#order").innerHTML = `
     <div class="order-toolbar">
@@ -204,18 +227,18 @@ async function loadOrderDesk() {
           class="active"
           data-category="all"
         >
-          All dishes
+          All
         </button>
 
-        ${categories
-          .map(
-            (category) => `
-          <button data-category="${escapeHtml(category)}">
-            ${escapeHtml(category)}
-          </button>
-        `,
-          )
-          .join("")}
+        ${MENU_CATEGORIES.map(
+          (category) => `
+            <button
+              data-category="${escapeHtml(category)}"
+            >
+              ${escapeHtml(category)}
+            </button>
+          `,
+        ).join("")}
       </div>
 
       <label class="search">
@@ -228,7 +251,17 @@ async function loadOrderDesk() {
       </label>
     </div>
 
-    <div class="order-layout">
+    <div class="order-layout-with-tables">
+      <aside class="table-selector">
+        <label for="table-number">
+          TABLE
+        </label>
+
+        <select id="table-number">
+          ${tableOptions}
+        </select>
+      </aside>
+
       <div
         id="menu-grid"
         class="menu-grid"
@@ -238,10 +271,15 @@ async function loadOrderDesk() {
         <div class="cart-heading">
           <div>
             <p>CURRENT ORDER</p>
-            <h2>Table service</h2>
+
+            <h2 id="selected-table-heading">
+              Table 1
+            </h2>
           </div>
 
-          <span id="cart-count">0 items</span>
+          <span id="cart-count">
+            0 items
+          </span>
         </div>
 
         <div
@@ -250,26 +288,28 @@ async function loadOrderDesk() {
         ></div>
 
         <div class="cart-footer">
-          <label>
-            Table number
-
-            <!-- cspell:disable -->
-            <input
-              id="table-number"
-              maxlength="20"
-              placeholder="e.g. 12"
-            >
-            <!-- cspell:enable -->
+          <label for="order-note">
+            ORDER NOTE
           </label>
+
+          <textarea
+            id="order-note"
+            maxLength="500"
+            rows="3"
+            placeholder="e.g. no onions, extra plates"
+          ></textarea>
 
           <div class="cart-total">
             <span>Total</span>
-            <strong id="cart-total">UGX 0</strong>
+
+            <strong id="cart-total">
+              UGX 0
+            </strong>
           </div>
 
           <button id="send-order">
             Send to kitchen
-            <span>→</span>
+            <span>&rarr;</span>
           </button>
         </div>
       </aside>
@@ -278,10 +318,15 @@ async function loadOrderDesk() {
 
   $("#menu-search").addEventListener("input", renderMenu);
 
+  $("#table-number").addEventListener("change", () => {
+    $("#selected-table-heading").textContent =
+      `Table ${$("#table-number").value}`;
+  });
+
   document.querySelectorAll("[data-category]").forEach((button) => {
     button.addEventListener("click", () => {
-      document.querySelectorAll("[data-category]").forEach((item) => {
-        item.classList.remove("active");
+      document.querySelectorAll("[data-category]").forEach((entry) => {
+        entry.classList.remove("active");
       });
 
       button.classList.add("active");
@@ -488,17 +533,26 @@ function renderCart() {
     });
   });
 }
-
 async function sendOrder() {
-  const tableNumber = $("#table-number").value.trim();
+  const tableNumber = $("#table-number").value;
+
+  const orderNote = $("#order-note").value.trim();
 
   if (!tableNumber) {
-    notify("Enter a table number", "error");
+    notify("Select a table", "error");
+
     return;
   }
 
   if (!state.cart.length) {
     notify("Add at least one dish", "error");
+
+    return;
+  }
+
+  if (orderNote.length > 500) {
+    notify("The order note is too long", "error");
+
     return;
   }
 
@@ -511,6 +565,7 @@ async function sendOrder() {
 
       body: JSON.stringify({
         tableNumber,
+        orderNote,
 
         items: state.cart.map(({ id, quantity }) => ({
           id,
@@ -723,7 +778,19 @@ function orderTicket(order) {
           )
           .join("")}
       </ul>
+${
+  order.order_note
+    ? `
+      <div class="ticket-note">
+        <strong>ORDER NOTE</strong>
 
+        <p>
+          ${escapeHtml(order.order_note)}
+        </p>
+      </div>
+    `
+    : ""
+}
       <div class="ticket-foot">
         <small>
           ${escapeHtml(order.waiter_name)}
@@ -794,28 +861,68 @@ async function loadInventory() {
             </i>
           </span>
 
-          <button
-            class="row-action"
-            data-edit-item="${item.id}"
-          >
-            Edit
-          </button>
-        </div>
+          <span>
+  <i class="status-pill ${item.active ? "active" : "inactive"}">
+    ${item.active ? "Active" : "Hidden"}
+  </i>
+</span>
+
+<div class="inventory-actions">
+  <button
+    class="row-action"
+    data-edit-item="${item.id}"
+  >
+    Edit
+  </button>
+
+  <button
+    class="row-action remove-action"
+    data-remove-item="${item.id}"
+    data-remove-name="${escapeHtml(item.name)}"
+  >
+    Remove
+  </button>
+</div>
       `,
         )
         .join("")}
     </div>
   `;
-
   $("#add-item").addEventListener("click", () => openItemDialog());
-
   document.querySelectorAll("[data-edit-item]").forEach((button) => {
     button.addEventListener("click", () => {
       openItemDialog(Number(button.dataset.editItem));
     });
   });
-}
 
+  document.querySelectorAll("[data-remove-item]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const itemName = button.dataset.removeName;
+
+      const confirmed = window.confirm(`Remove ${itemName} from the menu?`);
+
+      if (!confirmed) {
+        return;
+      }
+
+      button.disabled = true;
+
+      try {
+        await api(`/menu/${button.dataset.removeItem}`, {
+          method: "DELETE",
+        });
+
+        notify("Menu item removed");
+
+        await loadInventory();
+      } catch (error) {
+        notify(error.message, "error");
+
+        button.disabled = false;
+      }
+    });
+  });
+}
 function openItemDialog(id = null) {
   const item = state.menu.find((entry) => entry.id === id);
 
@@ -964,18 +1071,28 @@ async function loadStaff() {
           Role
 
           <select id="staff-role">
-            <option value="waiter">
-              Waiter
-            </option>
+  <option value="waiter">
+    Waiter
+  </option>
 
-            <option value="kitchen">
-              Kitchen
-            </option>
+  <option value="kitchen">
+    Kitchen
+  </option>
 
-            <option value="admin">
-              Administrator
-            </option>
-          </select>
+  ${
+    user.role === "admin"
+      ? `
+        <option value="manager">
+          Manager
+        </option>
+
+        <option value="admin">
+          Administrator
+        </option>
+      `
+      : ""
+  }
+</select>
         </label>
 
         <label>

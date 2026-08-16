@@ -1,28 +1,56 @@
 const form = document.querySelector("#login-form");
+
 const errorElement = document.querySelector("#error");
+
+const successElement = document.querySelector("#success-message");
+
 const loginButton = document.querySelector("#login-button");
+
 const emailInput = document.querySelector("#email");
+
 const passwordInput = document.querySelector("#password");
+
 const togglePasswordButton = document.querySelector("#toggle-password");
 
-togglePasswordButton.addEventListener("click", () => {
-  const isHidden = passwordInput.type === "password";
+const forgotPasswordButton = document.querySelector("#forgot-password");
 
-  passwordInput.type = isHidden ? "text" : "password";
-  togglePasswordButton.textContent = isHidden ? "Hide" : "Show";
-  togglePasswordButton.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
-  togglePasswordButton.setAttribute("aria-pressed", isHidden ? "true" : "false");
-});
+const forgotDialog = document.querySelector("#forgot-dialog");
+
+const closeForgotDialogButton = document.querySelector("#close-forgot-dialog");
+
+const forgotForm = document.querySelector("#forgot-form");
+
+const forgotEmailInput = document.querySelector("#forgot-email");
+
+const forgotResult = document.querySelector("#forgot-result");
+
+const googleLoginButton = document.querySelector("#google-login");
+
 
 if (localStorage.getItem("token") && localStorage.getItem("user")) {
   window.location.replace("dashboard.html");
 }
 
+togglePasswordButton.addEventListener("click", () => {
+  const passwordIsVisible = passwordInput.type === "text";
+
+  passwordInput.type = passwordIsVisible ? "password" : "text";
+
+  togglePasswordButton.setAttribute(
+    "aria-label",
+    passwordIsVisible ? "Show password" : "Hide password",
+  );
+
+  togglePasswordButton.setAttribute("aria-pressed", String(!passwordIsVisible));
+
+  togglePasswordButton.classList.toggle("active", !passwordIsVisible);
+});
+
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  errorElement.textContent = "";
-  errorElement.hidden = true;
+  hideMessages();
 
   loginButton.disabled = true;
   loginButton.textContent = "Signing in...";
@@ -55,6 +83,10 @@ form.addEventListener("submit", async (event) => {
 
     localStorage.setItem("user", JSON.stringify(data.user));
 
+    successElement.textContent = "Login successful. Opening workspace...";
+
+    successElement.hidden = false;
+
     window.location.replace("dashboard.html");
   } catch (error) {
     console.error("Login error:", error);
@@ -65,6 +97,81 @@ form.addEventListener("submit", async (event) => {
     errorElement.hidden = false;
 
     loginButton.disabled = false;
+
     loginButton.textContent = "Enter workspace";
   }
 });
+
+
+forgotPasswordButton.addEventListener("click", () => {
+  forgotEmailInput.value = emailInput.value.trim();
+
+  forgotResult.hidden = true;
+  forgotResult.textContent = "";
+
+  forgotDialog.showModal();
+
+  forgotEmailInput.focus();
+});
+
+
+closeForgotDialogButton.addEventListener("click", () => {
+  forgotDialog.close();
+});
+
+forgotDialog.addEventListener("click", (event) => {
+  if (event.target === forgotDialog) {
+    forgotDialog.close();
+  }
+});
+
+
+forgotForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const email = forgotEmailInput.value.trim().toLowerCase();
+
+  if (!email) {
+    return;
+  }
+
+  forgotResult.innerHTML = `
+      <strong>Password recovery</strong>
+
+      <p>
+        If this is a waiter or kitchen
+        account, contact your restaurant
+        administrator for a new password.
+      </p>
+
+      <p>
+        If this is the main administrator
+        account, change
+        <code>SEED_ADMIN_PASSWORD</code>
+        in the server's <code>.env</code>
+        file and run
+        <code>npm.cmd run seed</code>.
+      </p>
+    `;
+
+  forgotResult.hidden = false;
+});
+
+
+googleLoginButton.addEventListener("click", () => {
+  hideMessages();
+
+  errorElement.textContent =
+    "Google login is not configured yet. " +
+    "Use your staff email and password.";
+
+  errorElement.hidden = false;
+});
+
+function hideMessages() {
+  errorElement.hidden = true;
+  successElement.hidden = true;
+
+  errorElement.textContent = "";
+  successElement.textContent = "";
+}
