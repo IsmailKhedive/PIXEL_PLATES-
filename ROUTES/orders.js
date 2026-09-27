@@ -3,7 +3,30 @@ import db from "../db.js";
 import { protect, allowRoles } from "../authMiddleware.js";
 
 const router = Router();
+function calculateSellingPrice(item) {
+  const normalPrice = Number(item.price);
+  const discount = Number(item.discount_percent || 0);
 
+  const now = new Date();
+  const hasStarted =
+    !item.promotion_start || now >= new Date(item.promotion_start);
+
+  const hasNotEnded =
+    !item.promotion_end || now <= new Date(item.promotion_end);
+
+  const promotionActive =
+    Boolean(item.featured) &&
+    discount > 0 &&
+    discount <= 100 &&
+    hasStarted &&
+    hasNotEnded;
+
+  if (!promotionActive) {
+    return normalPrice;
+  }
+
+  return Math.round(normalPrice * (1 - discount / 100));
+}
 router.get(
   "/",
   protect,

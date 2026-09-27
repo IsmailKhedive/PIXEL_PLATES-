@@ -48,6 +48,7 @@ router.get("/", protect, async (req, res) => {
          name,
          category,
          price,
+         preparation_minutes,
          active,
          stock,
          image_url
@@ -69,8 +70,9 @@ router.post("/", protect, allowRoles("admin", "manager"), async (req, res) => {
   try {
     const name = String(req.body.name || "").trim();
     const category = normalizeCategory(req.body.category);
-    const price = Number(req.body.price);
-    const stock = Number(req.body.stock ?? 0);
+   const price = Number(req.body.price);
+   const preparationMinutes = Number(req.body.preparationMinutes || 15);
+   const stock = Number(req.body.stock ?? 0);
     if (
       !name ||
       name.length > 120 ||
@@ -93,11 +95,12 @@ router.post("/", protect, allowRoles("admin", "manager"), async (req, res) => {
              name,
              category,
              price,
+             preparation_minutes,
              stock,
              image_url
            )
-         VALUES (?, ?, ?, ?, ?, ?)`,
-      [req.user.restaurantId, name, category, price, stock, imageUrl],
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [req.user.restaurantId, name, category, price, preparationMinutes, stock, imageUrl],
     );
     res.status(201).json({
       id: result.insertId,
@@ -115,7 +118,17 @@ router.patch(
   allowRoles("admin", "manager"),
   async (req, res) => {
     try {
-      const allowedFields = ["name", "category", "price", "stock", "active"];
+      const allowedFields = [
+        "name",
+        "category",
+        "price",
+        "preparation_minutes",
+        "stock",
+        "active",
+      ];
+      if (req.body.preparationMinutes !== undefined) {
+        req.body.preparation_minutes = req.body.preparationMinutes;
+      }
       const updates = [];
       const values = [];
       for (const field of allowedFields) {
@@ -129,7 +142,11 @@ router.patch(
         if (field === "category") {
           value = normalizeCategory(value);
         }
-        if (field === "price" || field === "stock") {
+        if (
+          field === "price" ||
+          field === "stock" ||
+          field === "preparation_minutes"
+        ) {
           value = Number(value);
         }
         if (field === "active") {
@@ -160,6 +177,27 @@ router.patch(
           message: "No valid menu changes were supplied",
         });
       }
+      const invalidPreparationTime =
+        req.body.preparation_minutes !== undefined &&
+        (!Number.isInteger(Number(req.body.preparation_minutes)) ||
+          Number(req.body.preparation_minutes) < 1 ||
+          Number(req.body.preparation_minutes) > 300);
+      if (invalidPreparationTime) {
+        return res.status(400).json({
+          message: "Preparation time must be an integer between 1 and 300",
+        });
+      }
+      if (
+  !updates.length ||
+  invalidName ||
+  invalidPrice ||
+  invalidStock ||
+  invalidPreparationTime
+) {
+  return res.status(400).json({
+    message: "No valid menu changes were supplied",
+  });
+}
       values.push(req.params.id, req.user.restaurantId);
       const [result] = await db.query(
         `UPDATE menu_items

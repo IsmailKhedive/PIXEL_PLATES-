@@ -1,13 +1,8 @@
 import { Router } from "express";
 import db from "../db.js";
 import { tableDevice } from "../authMiddleware.js";
-
 const router = Router();
-
-
 router.use(tableDevice);
-
-
 router.get("/session", async (req, res) => {
   try {
     const [restaurants] = await db.query(
@@ -30,8 +25,6 @@ router.get("/session", async (req, res) => {
     });
   }
 });
-
-
 router.get("/menu", async (req, res) => {
   try {
     const [items] = await db.query(
@@ -40,6 +33,7 @@ router.get("/menu", async (req, res) => {
          name,
          category,
          price,
+         preparation_minutes,
          stock,
          image_url
        FROM menu_items
@@ -58,8 +52,6 @@ router.get("/menu", async (req, res) => {
     });
   }
 });
-
-
 router.get("/orders", async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -116,8 +108,6 @@ router.get("/orders", async (req, res) => {
     });
   }
 });
-
-
 router.post("/orders", async (req, res) => {
   const requestedItems = Array.isArray(req.body.items) ? req.body.items : [];
 
@@ -149,8 +139,6 @@ router.post("/orders", async (req, res) => {
 
     const ids = [...quantities.keys()];
     const placeholders = ids.map(() => "?").join(",");
-
-  
     const [items] = await connection.query(
       `SELECT
          id,
@@ -171,9 +159,7 @@ router.post("/orders", async (req, res) => {
       error.status = 400;
       throw error;
     }
-
     let total = 0;
-
     for (const item of items) {
       const quantity = quantities.get(item.id);
 

@@ -1,0 +1,4 @@
+ALTER TABLE menu_items
+ADD COLUMN preparation_minutes
+SMALLINT UNSIGNED NOT NULL DEFAULT 15
+AFTER price;

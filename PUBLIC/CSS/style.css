@@ -1952,3 +1952,37 @@ dialog::backdrop {
     grid-column: auto;
   }
 }
+.preparation-time {
+  display: block;
+  margin-top: 8px;
+  color: #68746f;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.sales-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 24px;
+}
+
+.download-sales-button {
+  width: auto;
+  min-width: 220px;
+  padding: 13px 20px;
+  border: 0;
+  border-radius: 4px;
+  background: #16483d;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.download-sales-button:hover {
+  background: #0f382f;
+}
+
+.download-sales-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
