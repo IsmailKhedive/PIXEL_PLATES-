@@ -1,12 +1,8 @@
-
 const params = new URLSearchParams(window.location.search);
-
 if (params.get("key")) {
   localStorage.setItem("pixelPlatesDeviceKey", params.get("key"));
-
   history.replaceState({}, "", "customer.html");
 }
-
 const deviceKey = localStorage.getItem("pixelPlatesDeviceKey");
 
 const $ = (selector) => document.querySelector(selector);
@@ -16,7 +12,6 @@ const money = (value) => {
     maximumFractionDigits: 0,
   })}`;
 };
-
 const escapeHtml = (value) => {
   return String(value ?? "").replace(
     /[&<>'"]/g,
@@ -30,14 +25,11 @@ const escapeHtml = (value) => {
       })[character],
   );
 };
-
 const state = {
   menu: [],
   cart: [],
   orders: [],
 };
-
-
 async function api(path, options = {}) {
   const response = await fetch(`/api/customer${path}`, {
     ...options,
@@ -57,37 +49,27 @@ async function api(path, options = {}) {
 
   return data;
 }
-
 function showError(message) {
   const element = $("#customer-error");
-
   element.textContent = message;
   element.hidden = false;
-
   clearTimeout(showError.timer);
-
   showError.timer = setTimeout(() => {
     element.hidden = true;
   }, 5000);
 }
-
-
 function updateClock() {
   const now = new Date();
-
   $("#customer-clock").textContent = now.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
-
   $("#customer-date").textContent = now.toLocaleDateString([], {
     weekday: "long",
     day: "numeric",
     month: "long",
   });
 }
-
-
 async function loadCustomerApplication() {
   try {
     const [session, menu, orders] = await Promise.all([
@@ -95,13 +77,10 @@ async function loadCustomerApplication() {
       api("/menu"),
       api("/orders"),
     ]);
-
     state.menu = menu;
     state.orders = orders;
-
     $("#customer-restaurant").textContent =
       session.restaurantName || "PIXEL PLATES";
-
     $("#customer-table").textContent = `TABLE ${session.tableNumber}`;
 
     renderMenu();
@@ -173,7 +152,11 @@ function renderMenu() {
                     +
                   </button>
                 </div>
-
+<small class="preparation-time">
+  Approximately
+  ${Number(item.preparation_minutes || 15)}
+  minutes
+</small>
                 <small>
                   ${item.stock ? `${item.stock} available` : "Sold out"}
                 </small>

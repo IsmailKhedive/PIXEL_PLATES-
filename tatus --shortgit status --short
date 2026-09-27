@@ -1,0 +1,15 @@
+warning: in the working copy of 'PUBLIC/CSS/style.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PUBLIC/JS/app.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PUBLIC/JS/auth.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PUBLIC/dashboard.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PUBLIC/login.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ROUTES/menu.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ROUTES/orders.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ROUTES/users.js', LF will be replaced by CRLF the next time Git touches it
+ROUTES/auth.js:55: trailing whitespace.
+[32m+[m[32m)[m[41m [m
+ROUTES/menu.js:55: trailing whitespace.
+[32m+[m[41m  [m
+ROUTES/menu.js:239: trailing whitespace.
+[32m+[m[41m    [m
